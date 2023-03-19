@@ -1,16 +1,13 @@
-{ config, pkgs, ... }:
+{ config, pkgs, username, ... }:
 
-let
-  user = "richard";
-in
 {
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "${user}";
-  home.homeDirectory = "/home/${user}";
+  home.username = username;
+  home.homeDirectory = "/home/${username}";
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
@@ -28,6 +25,14 @@ in
     pkgs.fd
     pkgs.ripgrep
     pkgs.bat
+    pkgs.git
+    pkgs.gh
+    pkgs._1password-gui
+    pkgs._1password
+    pkgs.rustup
+    pkgs.ruby_3_1
+    pkgs.firefox
+    pkgs.zk
   ];
 
   xdg.configFile."alacritty".source = config.lib.file.mkOutOfStoreSymlink ./config/alacritty;
