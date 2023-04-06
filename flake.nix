@@ -14,7 +14,7 @@
     defaultPackage.x86_64-linux = home-manager.defaultPackage.x86_64-linux;
 
     homeConfigurations = {
-      thinkpad_laptop = home-manager.lib.homeManagerConfiguration {
+      thinkpad = home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
           system = "x86_64-linux";
           config.allowUnfree = true;

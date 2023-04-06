@@ -1,4 +1,4 @@
-{ config, pkgs, username, ... }:
+{ config, pkgs, username, system, ... }:
 
 {
   # Let Home Manager install and manage itself.
@@ -19,45 +19,101 @@
   # changes in each release.
   home.stateVersion = "23.05";
 
+  fonts.fontconfig.enable = true;
+
   home.packages = [
-    pkgs.htop
-    pkgs.neovim
-    pkgs.fd
-    pkgs.ripgrep
-    pkgs.bat
-    pkgs.git
-    pkgs.gh
-    pkgs._1password-gui
     pkgs._1password
-    pkgs.rustup
-    pkgs.ruby_3_1
+    pkgs._1password-gui
+    pkgs.bat
+    pkgs.fd
     pkgs.firefox
+    pkgs.patchelf
+    pkgs.gh
+    pkgs.git
+    pkgs.htop
+    pkgs.jq
+    pkgs.neovim
+    pkgs.hack-font
+    (pkgs.nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
+    pkgs.ripgrep
+    pkgs.ruby_3_1
+    pkgs.rustup
+    pkgs.sd
     pkgs.zk
   ];
 
-  xdg.configFile."alacritty".source = config.lib.file.mkOutOfStoreSymlink ./config/alacritty;
+  /* xdg.configFile."alacritty".source = config.lib.file.mkOutOfStoreSymlink ./config/alacritty; */
+  xdg.configFile."wezterm".source = ./config/wezterm;
+  xdg.configFile."rg".source = ./config/rg;
 
-  /* programs.fish = { */
-  /*   enable = true; */
-  /*   plugins = [ */
-  /*     { */
-  /*       name = "plugin-foreign-env"; */
-  /*       src = pkgs.fetchFromGitHub { */
-  /*         owner = "oh-my-fish"; */
-  /*         repo = "plugin-foreign-env"; */
-  /*         rev = "3ee95536106c11073d6ff466c1681cde31001383"; */
-  /*         sha256 = "vyW/X2lLjsieMpP9Wi2bZPjReaZBkqUbkh15zOi8T4Y="; */
-  /*       }; */
-  /*     } */
-  /*   ]; */
-  /* }; */
-  /**/
-  /* home.file.".config/" = { */
-  /*   fish = { */
-  /*     enable = true; */
-  /*     source = config/fish; */
-  /*     recursive = true; */
-  /*   }; */
-  /* }; */
+  programs.fish = {
+    enable = true;
+    interactiveShellInit = ''
+      set fish_greeting # Disable greeting
+    '';
+    plugins = [
+      {
+        name = "plugin-foreign-env";
+        src = pkgs.fishPlugins.foreign-env.src;
+      }
+    ];
+  };
+
+  programs.kitty = {
+    enable = true;
+    font = {
+      name = "Hack";
+    };
+    settings = {
+      cursor_shape = "block";
+      hide_window_decorations = true;
+      macos_options_as_alt = true;
+    };
+  };
+
+  programs.tmux = {
+    enable = true;
+    clock24 = true;
+    shortcut = "q";
+    keyMode = "vi";
+    newSession = true;
+    mouse = true;
+    sensibleOnTop = true;
+    terminal = "xterm-256color";
+
+    plugins = [
+      pkgs.tmuxPlugins.cpu
+      pkgs.tmuxPlugins.resurrect
+      pkgs.tmuxPlugins.continuum
+    ];
+
+    extraConfig = ''
+      set -ga terminal-overrides ",*256col*:Tc"
+
+      set -g status-style bg=default
+
+      # Rebind S for session list
+      unbind s
+      bind S choose-session
+
+      # Split panes with s and v like vim
+      bind s split-window -v
+      bind v split-window -h
+      unbind '"'
+      unbind %
+
+      # Use vim like pane switching
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
+
+      set-option -g allow-rename off
+
+      # Better mnemonic for renaming panes
+      set -s command-alias[10] rename-pane='select-pane -T'
+      set -s command-alias[11] renamep='select-pane -T'
+    '';
+  };
 }
 
